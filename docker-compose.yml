@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+
+  standalone:
+    image: apachepulsar/pulsar:2.6.0
+    ports:
+      - "8088:8080"
+      - "6650:6650"
+    volumes:
+      - type: volume
+        source: data
+        target: /pulsar/data
+      - type: volume
+        source: conf
+        target: /pulsar/conf
+    environment:
+      - BOOKIE_MEM=" -Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g"
+    command: "bin/pulsar standalone"
+  
+  dashboard:
+    image: apachepulsar/pulsar-dashboard:2.6.0
+    depends_on:
+      - standalone
+    ports:
+      - "8089:80"
+    environment:
+      - SERVICE_URL=http://standalone:8080
+
+volumes: 
+  data:
+  conf:
