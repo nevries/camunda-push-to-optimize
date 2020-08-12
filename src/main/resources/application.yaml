@@ -22,4 +22,3 @@ camunda:
 
 pulsar:
   url: pulsar://localhost:6650
-  topic: optimize

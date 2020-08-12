@@ -9,8 +9,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "pulsar")
 public class Pulsar {
+  public static String TOPIC_PI_RUNNING = "optimize:process-instance:running";
+  public static String TOPIC_PI_COMPLETED = "optimize:process-instance:completed";
+  public static String TOPIC_VAR_UPDATE = "optimize:variable-update";
+  public static String TOPIC_AI_RUNNING = "optimize:activity-instance:running";
+  public static String TOPIC_AI_COMPLETED = "optimize:activity-instance:completed";
+
   private String url;
-  private String topic;
 
   @Bean
   public PulsarClient pulsarClient() {
@@ -24,18 +29,20 @@ public class Pulsar {
   }
 
   @Bean
-  public Producer<String> pulsarProducer(@Autowired PulsarClient pulsarClient) {
+  public Producer<String> pulsarPiRunningProducer(@Autowired PulsarClient pulsarClient) {
     try {
-      return pulsarClient.newProducer(Schema.STRING).topic(getTopic()).create();
+      return pulsarClient.newProducer(Schema.STRING).topic(TOPIC_PI_RUNNING).create();
     } catch (PulsarClientException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Bean
-  Consumer<String> pulsarConsumer(@Autowired PulsarClient pulsarClient) {
+  Consumer<String> pulsarPiRunningConsumer(@Autowired PulsarClient pulsarClient) {
     try {
-      return pulsarClient.newConsumer(Schema.STRING).topic(getTopic()).subscriptionName("Test").subscribe();
+      return pulsarClient.newConsumer(Schema.STRING)
+          .topic(TOPIC_PI_RUNNING, TOPIC_AI_COMPLETED, TOPIC_AI_RUNNING, TOPIC_PI_COMPLETED, TOPIC_VAR_UPDATE)
+          .subscriptionName("Test").subscribe();
     } catch (PulsarClientException e) {
       throw new RuntimeException(e);
     }
@@ -49,11 +56,4 @@ public class Pulsar {
     this.url = url;
   }
 
-  public String getTopic() {
-    return topic;
-  }
-
-  public void setTopic(String topic) {
-    this.topic = topic;
-  }
 }

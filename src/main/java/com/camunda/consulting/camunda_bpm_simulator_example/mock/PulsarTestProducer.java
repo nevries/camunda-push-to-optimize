@@ -1,4 +1,4 @@
-package com.camunda.consulting.camunda_bpm_simulator_example;
+package com.camunda.consulting.camunda_bpm_simulator_example.mock;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.*;
@@ -17,7 +17,7 @@ public class PulsarTestProducer {
   private final Producer<String> producer;
 
   @Autowired
-  public PulsarTestProducer(@Qualifier("pulsarProducer") Producer<String> producer) {
+  public PulsarTestProducer(@Qualifier("pulsarPiRunningProducer") Producer<String> producer) {
     log.info("Create test producer");
     this.producer = producer;
   }

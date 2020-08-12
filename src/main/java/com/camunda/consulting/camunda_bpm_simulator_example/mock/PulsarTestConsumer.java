@@ -1,4 +1,4 @@
-package com.camunda.consulting.camunda_bpm_simulator_example;
+package com.camunda.consulting.camunda_bpm_simulator_example.mock;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.*;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Profile("consumer")
 public class PulsarTestConsumer {
   @Autowired
-  public PulsarTestConsumer(@Qualifier("pulsarConsumer") Consumer<String> consumer) {
+  public PulsarTestConsumer(@Qualifier("pulsarPiRunningConsumer") Consumer<String> consumer) {
     log.info("Create test consumer");
     new Thread(() -> {
       while (true) {
