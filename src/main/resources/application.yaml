@@ -20,3 +20,6 @@ camunda:
       max-wait: 3
       wait-time-in-millis: 1
 
+pulsar:
+  url: pulsar://localhost:6650
+  topic: optimize

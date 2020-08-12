@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Bean;
 import com.camunda.consulting.simulator.PayloadGenerator;
 import com.camunda.consulting.simulator.SimulationExecutor;
 import com.camunda.consulting.simulator.SimulatorPlugin;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableProcessApplication
+@EnableScheduling
 public class CamundaApplication {
 
   public static void main(String... args) {
