@@ -5,15 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.history.HistoricActivityInstance;
 import org.camunda.bpm.engine.history.HistoricIdentityLinkLog;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
-import org.camunda.bpm.engine.history.HistoricVariableUpdate;
-import org.camunda.bpm.engine.impl.cmd.optimize.OptimizeRunningHistoricTaskInstanceQueryCmd;
-import org.camunda.bpm.engine.impl.context.Context;
-import org.camunda.bpm.engine.impl.db.entitymanager.DbEntityManager;
-import org.camunda.bpm.engine.impl.history.event.*;
+import org.camunda.bpm.engine.impl.history.event.HistoricActivityInstanceEventEntity;
+import org.camunda.bpm.engine.impl.history.event.HistoricIdentityLinkLogEventEntity;
+import org.camunda.bpm.engine.impl.history.event.HistoricProcessInstanceEventEntity;
+import org.camunda.bpm.engine.impl.history.event.HistoricVariableUpdateEventEntity;
+import org.camunda.bpm.engine.impl.history.event.HistoryEvent;
+import org.camunda.bpm.engine.impl.history.event.HistoryEventTypes;
 import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
 import org.camunda.bpm.engine.impl.persistence.entity.HistoricDetailVariableInstanceUpdateEntity;
-import org.camunda.bpm.engine.impl.persistence.entity.HistoricProcessInstanceEntity;
-import org.camunda.bpm.engine.impl.persistence.entity.optimize.OptimizeHistoricIdentityLinkLogEntity;
 import org.camunda.bpm.engine.rest.dto.history.HistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.HistoricProcessInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricActivityInstanceDto;
@@ -48,7 +47,7 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
       handle((HistoricIdentityLinkLogEventEntity)historyEvent);
     }
     else {
-      log.warn("Not handled: " + historyEvent.toString());
+      log.debug("Not handled: " + historyEvent.toString());
     }
   }
 

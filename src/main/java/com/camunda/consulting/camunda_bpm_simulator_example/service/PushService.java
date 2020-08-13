@@ -1,5 +1,6 @@
 package com.camunda.consulting.camunda_bpm_simulator_example.service;
 
+import com.camunda.consulting.camunda_bpm_simulator_example.conf.ObjectMapperBuilder;
 import com.camunda.consulting.camunda_bpm_simulator_example.conf.Pulsar;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ import java.util.Map;
 @Component
 public class PushService {
   private PulsarClient client;
+  private static final ObjectMapper objectMapper = ObjectMapperBuilder.build();
 
   @Autowired
   public PushService(PulsarClient client) {
@@ -73,7 +75,7 @@ public class PushService {
         producer = client.newProducer(Schema.STRING).topic(topic).create();
         producerCache.put(topic, producer);
       }
-      producer.send(new ObjectMapper().writeValueAsString(optimizeHistoricVariableUpdateDto));
+      producer.send(objectMapper.writeValueAsString(optimizeHistoricVariableUpdateDto));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
