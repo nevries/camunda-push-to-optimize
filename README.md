@@ -25,6 +25,8 @@ Currently, it sends
 * process instance running
 * process instance completed
 * activity instance running
-* process instance completed
+* activity instance completed
+* task instance running
+* task instance completed
 * variable update
 * identity link log
