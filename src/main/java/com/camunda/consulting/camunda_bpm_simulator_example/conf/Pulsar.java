@@ -21,6 +21,8 @@ public class Pulsar {
   public static String TOPIC_AI_RUNNING = "optimize:activity-instance:running";
   public static String TOPIC_AI_COMPLETED = "optimize:activity-instance:completed";
   public static String TOPIC_ID_LINK_LOG = "optimize:identity-link-log";
+  public static String TOPIC_PD = "optimize:process-definition";
+  public static String TOPIC_PD_XML = "optimize:process-definition-xml";
 
   private String url;
 
@@ -48,7 +50,7 @@ public class Pulsar {
   Consumer<String> pulsarPiRunningConsumer(@Autowired PulsarClient pulsarClient) {
     try {
       return pulsarClient.newConsumer(Schema.STRING)
-          .topic(TOPIC_PI_RUNNING, TOPIC_AI_COMPLETED, TOPIC_AI_RUNNING, TOPIC_PI_COMPLETED, TOPIC_VAR_UPDATE, TOPIC_ID_LINK_LOG)
+          .topic(TOPIC_PI_RUNNING, TOPIC_AI_COMPLETED, TOPIC_AI_RUNNING, TOPIC_PI_COMPLETED, TOPIC_VAR_UPDATE, TOPIC_ID_LINK_LOG, TOPIC_PD, TOPIC_PD_XML)
           .subscriptionName("Test").subscribe();
     } catch (PulsarClientException e) {
       throw new RuntimeException(e);

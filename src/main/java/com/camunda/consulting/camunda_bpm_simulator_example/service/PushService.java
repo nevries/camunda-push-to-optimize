@@ -12,6 +12,8 @@ import org.camunda.bpm.engine.rest.dto.history.HistoricProcessInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricActivityInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricVariableUpdateDto;
+import org.camunda.bpm.engine.rest.dto.repository.ProcessDefinitionDiagramDto;
+import org.camunda.bpm.engine.rest.dto.repository.ProcessDefinitionDto;
 import org.camunda.bpm.engine.rest.util.ProvidersUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,14 @@ public class PushService {
   @Autowired
   public PushService(PulsarClient client) {
     this.client = client;
+  }
+
+  public void pushProcDef(ProcessDefinitionDto processDefinitionDto) {
+    push(processDefinitionDto, Pulsar.TOPIC_PD);
+  }
+
+  public void pushProcDefXML(ProcessDefinitionDiagramDto processDefinitionDiagramDto) {
+    push(processDefinitionDiagramDto, Pulsar.TOPIC_PD_XML);
   }
 
   public void pushIdLinkLog(OptimizeHistoricIdentityLinkLogDto dto) {

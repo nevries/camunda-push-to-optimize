@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class Plugin {
 
   @Bean
-  public ProcessEnginePlugin pushPlugin(@Autowired PushService pushService) {
+  public PushPlugin pushPlugin(@Autowired PushService pushService) {
     return new PushPlugin(pushService);
   }
 }
