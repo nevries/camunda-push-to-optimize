@@ -1,5 +1,5 @@
 spring.datasource:
-  url: jdbc:h2:./camunda-db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  url: jdbc:h2:mem:camunda
   username: sa
   password: sa
 #  url: jdbc:postgresql://localhost/postgres
@@ -17,8 +17,11 @@ server.port: 8080
 camunda:
   bpm:
     job-execution:
-      max-wait: 3
-      wait-time-in-millis: 1
+      max-wait: 3000
+      wait-time-in-millis: 100
+      queue-capacity: 100
+      max-jobs-per-acquisition: 50
+      core-pool-size: 10
 
 pulsar:
   url: pulsar://localhost:6650

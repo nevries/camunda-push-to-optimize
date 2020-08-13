@@ -54,12 +54,12 @@ public class PushPlugin implements ProcessEnginePlugin {
     List<ProcessDefinition> processDefinitions = event.getProcessEngine().getRepositoryService().createProcessDefinitionQuery().list();
     for (ProcessDefinition processDefinition : processDefinitions) {
       ProcessDefinitionDto processDefinitionDto = ProcessDefinitionDto.fromProcessDefinition(processDefinition);
-      pushService.pushProcDef(processDefinitionDto);
+      pushService.push(processDefinitionDto);
       InputStream processModelIn = event.getProcessEngine().getRepositoryService().getProcessModel(processDefinition.getId());
       byte[] processModel = IoUtil.readInputStream(processModelIn, "processModelBpmn20Xml");
       try {
         ProcessDefinitionDiagramDto processDefinitionDiagramDto = ProcessDefinitionDiagramDto.create(processDefinition.getId(), new String(processModel, "UTF-8"));
-        pushService.pushProcDefXML(processDefinitionDiagramDto);
+        pushService.push(processDefinitionDiagramDto);
       } catch (UnsupportedEncodingException e) {
         throw new RuntimeException(e);
       }

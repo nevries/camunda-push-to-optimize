@@ -5,16 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.history.HistoricActivityInstance;
 import org.camunda.bpm.engine.history.HistoricIdentityLinkLog;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
-import org.camunda.bpm.engine.impl.history.event.HistoricActivityInstanceEventEntity;
-import org.camunda.bpm.engine.impl.history.event.HistoricIdentityLinkLogEventEntity;
-import org.camunda.bpm.engine.impl.history.event.HistoricProcessInstanceEventEntity;
-import org.camunda.bpm.engine.impl.history.event.HistoricVariableUpdateEventEntity;
-import org.camunda.bpm.engine.impl.history.event.HistoryEvent;
-import org.camunda.bpm.engine.impl.history.event.HistoryEventTypes;
+import org.camunda.bpm.engine.history.HistoricTaskInstance;
+import org.camunda.bpm.engine.impl.history.event.*;
 import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
 import org.camunda.bpm.engine.impl.persistence.entity.HistoricDetailVariableInstanceUpdateEntity;
 import org.camunda.bpm.engine.rest.dto.history.HistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.HistoricProcessInstanceDto;
+import org.camunda.bpm.engine.rest.dto.history.HistoricTaskInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricActivityInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricVariableUpdateDto;
@@ -36,18 +33,25 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
   public void handleEvent(HistoryEvent historyEvent) {
     if (historyEvent instanceof HistoricProcessInstanceEventEntity) {
       handle((HistoricProcessInstanceEventEntity) historyEvent);
-    }
-    else if (historyEvent instanceof HistoricVariableUpdateEventEntity) {
+    } else if (historyEvent instanceof HistoricVariableUpdateEventEntity) {
       handle((HistoricVariableUpdateEventEntity) historyEvent);
-    }
-    else if (historyEvent instanceof HistoricActivityInstanceEventEntity) {
-      handle((HistoricActivityInstanceEventEntity)historyEvent);
-    }
-    else if (historyEvent instanceof HistoricIdentityLinkLogEventEntity) {
-      handle((HistoricIdentityLinkLogEventEntity)historyEvent);
-    }
-    else {
+    } else if (historyEvent instanceof HistoricActivityInstanceEventEntity) {
+      handle((HistoricActivityInstanceEventEntity) historyEvent);
+    } else if (historyEvent instanceof HistoricTaskInstanceEventEntity) {
+      handle((HistoricTaskInstanceEventEntity) historyEvent);
+    } else if (historyEvent instanceof HistoricIdentityLinkLogEventEntity) {
+      handle((HistoricIdentityLinkLogEventEntity) historyEvent);
+    } else {
       log.debug("Not handled: " + historyEvent.toString());
+    }
+  }
+
+  private void handle(HistoricTaskInstanceEventEntity historyEvent) {
+    HistoricTaskInstanceDto historicTaskInstanceDto = HistoricTaskInstanceDto.fromHistoricTaskInstance(getProxy(historyEvent, HistoricTaskInstance.class));
+    if (historyEvent.isEventOfType(HistoryEventTypes.TASK_INSTANCE_COMPLETE)) {
+      pushService.pushCompleted(historicTaskInstanceDto);
+    } else if (historyEvent.isEventOfType(HistoryEventTypes.TASK_INSTANCE_CREATE)) {
+      pushService.pushRunning(historicTaskInstanceDto);
     }
   }
 
@@ -56,16 +60,16 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
     HistoricIdentityLinkLogDto.fromHistoricIdentityLink(dto, getProxy(historyEvent, HistoricIdentityLinkLog.class));
     dto.setProcessInstanceId(historyEvent.getProcessInstanceId());
 
-    pushService.pushIdLinkLog(dto);
+    pushService.push(dto);
   }
 
   private void handle(HistoricActivityInstanceEventEntity historyEvent) {
     OptimizeHistoricActivityInstanceDto optimizeHistoricActivityInstanceDto = OptimizeHistoricActivityInstanceDto.fromHistoricActivityInstance(
         getProxy(historyEvent, HistoricActivityInstance.class));
     if (historyEvent.isEventOfType(HistoryEventTypes.ACTIVITY_INSTANCE_START)) {
-      pushService.pushAiRunning(optimizeHistoricActivityInstanceDto);
+      pushService.pushRunning(optimizeHistoricActivityInstanceDto);
     } else if (historyEvent.isEventOfType(HistoryEventTypes.ACTIVITY_INSTANCE_END)) {
-      pushService.pushAiCompleted(optimizeHistoricActivityInstanceDto);
+      pushService.pushCompleted(optimizeHistoricActivityInstanceDto);
     }
   }
 
@@ -115,16 +119,22 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
 
     OptimizeHistoricVariableUpdateDto optimizeHistoricVariableUpdateDto = OptimizeHistoricVariableUpdateDto.fromHistoricVariableUpdate(historicDetailVariableInstanceUpdateEntity);
 
-    pushService.pushVarUpdate(optimizeHistoricVariableUpdateDto);
+    pushService.push(optimizeHistoricVariableUpdateDto);
   }
+
+  // TODO: dirty counter
+  public static long counterStart = 0;
+  public static long counterEnd = 0;
 
   private void handle(HistoricProcessInstanceEventEntity processInstanceEventEntity) {
     HistoricProcessInstanceDto historicProcessInstanceDto = HistoricProcessInstanceDto.fromHistoricProcessInstance(
         getProxy(processInstanceEventEntity, HistoricProcessInstance.class));
     if (processInstanceEventEntity.isEventOfType(HistoryEventTypes.PROCESS_INSTANCE_START)) {
-      pushService.pushPiRunning(historicProcessInstanceDto);
+      pushService.pushRunning(historicProcessInstanceDto);
+      counterStart++;
     } else if (processInstanceEventEntity.isEventOfType(HistoryEventTypes.PROCESS_INSTANCE_END)) {
-      pushService.pushPiCompleted(historicProcessInstanceDto);
+      pushService.pushCompleted(historicProcessInstanceDto);
+      counterEnd++;
     }
   }
 

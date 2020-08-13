@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.1.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
   <bpmn:process id="bathroomRoutine" name="Bathroom Routine" isExecutable="true">
     <bpmn:sequenceFlow id="SequenceFlow_0w8wagv" sourceRef="StartEvent" targetRef="Task_1ofh7xx" />
     <bpmn:userTask id="Task_1ofh7xx" name="Go to bathroom and check if occupied">
@@ -53,6 +53,7 @@
         <bpmn:extensionElements>
           <camunda:properties>
             <camunda:property name="simNextFire" value="${generator.nowPlusSeconds(generator.uniformInt(0,60))}" />
+            <camunda:property name="simGeneratePayload" value="final_temp=${generator.normal(&#39;temp&#39;,93.0,5.0)}" />
           </camunda:properties>
         </bpmn:extensionElements>
         <bpmn:incoming>SequenceFlow_0np0p32</bpmn:incoming>
@@ -144,7 +145,6 @@
     <bpmn:startEvent id="StartEvent" name="Camundo needs to take a shower">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property name="simNextFire" value="${generator.timesPerDay(&#34;shower&#34;,&#34;00:00&#34;,&#34;23:59&#34;,14400)}" />
           <camunda:property name="simInitPayload" value="camundo=${generator.firstname()}" />
         </camunda:properties>
       </bpmn:extensionElements>

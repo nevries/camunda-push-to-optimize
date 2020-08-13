@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("consumer")
 public class PulsarTestConsumer {
+  public static long counter = 0;
+
   @Autowired
   public PulsarTestConsumer(@Qualifier("pulsarPiRunningConsumer") Consumer<String> consumer) {
     log.info("Create test consumer");
@@ -23,7 +25,8 @@ public class PulsarTestConsumer {
           throw new RuntimeException(e);
         }
 
-        log.info("Got: " + new String(message.getData()));
+        counter++;
+        //log.info("Got: " + message.getTopicName() + ": " + new String(message.getData()));
       }
     }).start();
   }
