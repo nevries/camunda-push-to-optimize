@@ -9,6 +9,7 @@ import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
 import org.camunda.bpm.engine.rest.dto.history.HistoricProcessInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricActivityInstanceDto;
+import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricVariableUpdateDto;
 import org.camunda.bpm.engine.rest.util.ProvidersUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,10 @@ public class PushService {
   @Autowired
   public PushService(PulsarClient client) {
     this.client = client;
+  }
+
+  public void pushIdLinkLog(OptimizeHistoricIdentityLinkLogDto dto) {
+    push(dto, Pulsar.TOPIC_ID_LINK_LOG);
   }
 
   public void pushAiCompleted(OptimizeHistoricActivityInstanceDto optimizeHistoricActivityInstanceDto) {
@@ -73,4 +78,5 @@ public class PushService {
       throw new RuntimeException(e);
     }
   }
+
 }

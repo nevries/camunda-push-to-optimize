@@ -3,6 +3,7 @@ package com.camunda.consulting.camunda_bpm_simulator_example.plugin;
 import com.camunda.consulting.camunda_bpm_simulator_example.service.PushService;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.history.HistoricActivityInstance;
+import org.camunda.bpm.engine.history.HistoricIdentityLinkLog;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricVariableUpdate;
 import org.camunda.bpm.engine.impl.cmd.optimize.OptimizeRunningHistoricTaskInstanceQueryCmd;
@@ -10,9 +11,13 @@ import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.db.entitymanager.DbEntityManager;
 import org.camunda.bpm.engine.impl.history.event.*;
 import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
+import org.camunda.bpm.engine.impl.persistence.entity.HistoricDetailVariableInstanceUpdateEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.HistoricProcessInstanceEntity;
+import org.camunda.bpm.engine.impl.persistence.entity.optimize.OptimizeHistoricIdentityLinkLogEntity;
+import org.camunda.bpm.engine.rest.dto.history.HistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.HistoricProcessInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricActivityInstanceDto;
+import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.optimize.OptimizeHistoricVariableUpdateDto;
 
 import java.lang.reflect.InvocationHandler;
@@ -32,14 +37,27 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
   public void handleEvent(HistoryEvent historyEvent) {
     if (historyEvent instanceof HistoricProcessInstanceEventEntity) {
       handle((HistoricProcessInstanceEventEntity) historyEvent);
-    } else if (historyEvent instanceof HistoricVariableUpdateEventEntity) {
-      // FIXME not working yet
-      // handle((HistoricVariableUpdateEventEntity) historyEvent);
-    } else if (historyEvent instanceof HistoricActivityInstanceEventEntity) {
+    }
+    else if (historyEvent instanceof HistoricVariableUpdateEventEntity) {
+      handle((HistoricVariableUpdateEventEntity) historyEvent);
+    }
+    else if (historyEvent instanceof HistoricActivityInstanceEventEntity) {
       handle((HistoricActivityInstanceEventEntity)historyEvent);
-    } else {
+    }
+    else if (historyEvent instanceof HistoricIdentityLinkLogEventEntity) {
+      handle((HistoricIdentityLinkLogEventEntity)historyEvent);
+    }
+    else {
       log.warn("Not handled: " + historyEvent.toString());
     }
+  }
+
+  private void handle(HistoricIdentityLinkLogEventEntity historyEvent) {
+    OptimizeHistoricIdentityLinkLogDto dto = new OptimizeHistoricIdentityLinkLogDto();
+    HistoricIdentityLinkLogDto.fromHistoricIdentityLink(dto, getProxy(historyEvent, HistoricIdentityLinkLog.class));
+    dto.setProcessInstanceId(historyEvent.getProcessInstanceId());
+
+    pushService.pushIdLinkLog(dto);
   }
 
   private void handle(HistoricActivityInstanceEventEntity historyEvent) {
@@ -52,8 +70,53 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
     }
   }
 
-  private void handle(HistoricVariableUpdateEventEntity historyEvent) {
-    OptimizeHistoricVariableUpdateDto.fromHistoricVariableUpdate(getProxy(historyEvent, HistoricVariableUpdate.class));
+  private void handle(HistoricVariableUpdateEventEntity event) {
+    if (event.getByteValue() != null) {
+      // TODO: currently we abandon complex data types
+      return;
+    }
+
+    HistoricDetailVariableInstanceUpdateEntity historicDetailVariableInstanceUpdateEntity = new HistoricDetailVariableInstanceUpdateEntity();
+
+    historicDetailVariableInstanceUpdateEntity.setByteArrayId(null);
+    historicDetailVariableInstanceUpdateEntity.setByteArrayValue(null);
+    historicDetailVariableInstanceUpdateEntity.setSerializerName(null);
+    historicDetailVariableInstanceUpdateEntity.setByteValue(null);
+
+    historicDetailVariableInstanceUpdateEntity.setActivityInstanceId(event.getActivityInstanceId());
+    historicDetailVariableInstanceUpdateEntity.setCaseDefinitionId(event.getCaseDefinitionId());
+    historicDetailVariableInstanceUpdateEntity.setCaseDefinitionKey(event.getCaseDefinitionKey());
+    historicDetailVariableInstanceUpdateEntity.setCaseDefinitionName(event.getCaseDefinitionName());
+    historicDetailVariableInstanceUpdateEntity.setCaseExecutionId(event.getCaseExecutionId());
+    historicDetailVariableInstanceUpdateEntity.setCaseInstanceId(event.getCaseInstanceId());
+    historicDetailVariableInstanceUpdateEntity.setDoubleValue(event.getDoubleValue());
+    historicDetailVariableInstanceUpdateEntity.setEventType(event.getEventType());
+    historicDetailVariableInstanceUpdateEntity.setExecutionId(event.getExecutionId());
+    historicDetailVariableInstanceUpdateEntity.setId(event.getId());
+    historicDetailVariableInstanceUpdateEntity.setInitial(event.isInitial());
+    historicDetailVariableInstanceUpdateEntity.setLongValue(event.getLongValue());
+    historicDetailVariableInstanceUpdateEntity.setProcessDefinitionId(event.getProcessDefinitionId());
+    historicDetailVariableInstanceUpdateEntity.setProcessDefinitionKey(event.getProcessDefinitionKey());
+    historicDetailVariableInstanceUpdateEntity.setProcessDefinitionName(event.getProcessDefinitionName());
+    historicDetailVariableInstanceUpdateEntity.setProcessDefinitionVersion(event.getProcessDefinitionVersion());
+    historicDetailVariableInstanceUpdateEntity.setProcessInstanceId(event.getProcessInstanceId());
+    historicDetailVariableInstanceUpdateEntity.setRemovalTime(event.getRemovalTime());
+    historicDetailVariableInstanceUpdateEntity.setRevision(event.getRevision());
+    historicDetailVariableInstanceUpdateEntity.setRootProcessInstanceId(event.getRootProcessInstanceId());
+    historicDetailVariableInstanceUpdateEntity.setScopeActivityInstanceId(event.getScopeActivityInstanceId());
+    historicDetailVariableInstanceUpdateEntity.setSequenceCounter(event.getSequenceCounter());
+    historicDetailVariableInstanceUpdateEntity.setTaskId(event.getTaskId());
+    historicDetailVariableInstanceUpdateEntity.setTenantId(event.getTenantId());
+    historicDetailVariableInstanceUpdateEntity.setTextValue(event.getTextValue());
+    historicDetailVariableInstanceUpdateEntity.setTextValue2(event.getTextValue2());
+    historicDetailVariableInstanceUpdateEntity.setTimestamp(event.getTimestamp());
+    historicDetailVariableInstanceUpdateEntity.setUserOperationId(event.getUserOperationId());
+    historicDetailVariableInstanceUpdateEntity.setVariableInstanceId(event.getVariableInstanceId());
+    historicDetailVariableInstanceUpdateEntity.setVariableName(event.getVariableName());
+
+    OptimizeHistoricVariableUpdateDto optimizeHistoricVariableUpdateDto = OptimizeHistoricVariableUpdateDto.fromHistoricVariableUpdate(historicDetailVariableInstanceUpdateEntity);
+
+    pushService.pushVarUpdate(optimizeHistoricVariableUpdateDto);
   }
 
   private void handle(HistoricProcessInstanceEventEntity processInstanceEventEntity) {
