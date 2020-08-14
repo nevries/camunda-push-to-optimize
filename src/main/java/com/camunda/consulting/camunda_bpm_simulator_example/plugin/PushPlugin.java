@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
+import org.camunda.bpm.engine.impl.history.handler.CompositeDbHistoryEventHandler;
 import org.camunda.bpm.engine.impl.util.IoUtil;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.rest.dto.repository.ProcessDefinitionDiagramDto;
@@ -15,7 +15,6 @@ import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -30,12 +29,10 @@ public class PushPlugin implements ProcessEnginePlugin {
   @Override
   public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
     log.info("Registering Push Plugin");
-    List<HistoryEventHandler> handlers = processEngineConfiguration.getCustomHistoryEventHandlers();
-    if (handlers==null) {
-      handlers = new ArrayList<>();
-      processEngineConfiguration.setCustomHistoryEventHandlers(handlers);
-    }
-    handlers.add(new PushHistoryEventHandler(pushService));
+    // this disables history only pushes events to pulsar
+    processEngineConfiguration.setHistoryEventHandler(
+      new CompositeDbHistoryEventHandler(new PushHistoryEventHandler(pushService))
+    );
   }
 
   @Override
