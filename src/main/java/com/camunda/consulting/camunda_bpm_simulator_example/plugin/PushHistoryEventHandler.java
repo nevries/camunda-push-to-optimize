@@ -9,6 +9,7 @@ import org.camunda.bpm.engine.history.HistoricTaskInstance;
 import org.camunda.bpm.engine.impl.history.event.*;
 import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
 import org.camunda.bpm.engine.impl.persistence.entity.HistoricDetailVariableInstanceUpdateEntity;
+import org.camunda.bpm.engine.impl.persistence.entity.HistoricProcessInstanceEntity;
 import org.camunda.bpm.engine.rest.dto.history.HistoricIdentityLinkLogDto;
 import org.camunda.bpm.engine.rest.dto.history.HistoricProcessInstanceDto;
 import org.camunda.bpm.engine.rest.dto.history.HistoricTaskInstanceDto;
@@ -127,6 +128,7 @@ public class PushHistoryEventHandler implements HistoryEventHandler {
   public static long counterEnd = 0;
 
   private void handle(HistoricProcessInstanceEventEntity processInstanceEventEntity) {
+    processInstanceEventEntity.setProcessDefinitionVersion(1); // TODO: think about how to properly receive the version
     HistoricProcessInstanceDto historicProcessInstanceDto = HistoricProcessInstanceDto.fromHistoricProcessInstance(
         getProxy(processInstanceEventEntity, HistoricProcessInstance.class));
     if (processInstanceEventEntity.isEventOfType(HistoryEventTypes.PROCESS_INSTANCE_START)) {
