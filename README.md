@@ -34,7 +34,12 @@ Currently, it sends
 ## Future road blocks
 
 * history event entities are not exactly easy to pump into Optimize DTOs (the entity inheritance structure in cambpm is what I call "evolved over time, but not like good wine")
+* non-primitive data currently not possible
 * de-couble event generation from history level (since NONE is ok for this approach)
 * transactions: how to make sure that events are sent to Pulsar **if and only if** the corresponding transaction in cambpm was successfully committed
 * say we start to use that mechanism but already have history data in cambpm, what to do?
 * similar case: we already use camunda and optimize and want to change to pushing, how to make the shift robust?
+
+## Ideas
+
+* use stream processors to enrich data (instead of optimize plugin)
